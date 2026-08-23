@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:8080/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "پلنر تحصیلی",
+      "hasCanvas": false,
+      "bodyTextLen": 7096,
+      "bodyTextHash": "38cad196df40e279800f1cc4d275f60ad15be36f4d3f2fa7e8983182481c8600",
+      "bodyTextPrefix": "پلنر تحصیلی ۱۴۰۵–۱۴۰۶ دانشجو · ۱ شهریور کپی شیت اکسل تکلیف داشبو",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "پلنر تحصیلی",
+      "hasCanvas": false,
+      "bodyTextLen": 1530,
+      "bodyTextHash": "812609b0538b50f9a6a3f13ed3366c34158b8e3971269d085e548aa49891c53b",
+      "bodyTextPrefix": "پلنر تحصیلی ۱۴۰۵–۱۴۰۶ دانشجو · ۱ شهریور تاریخ امروز یکشنبه ۱ شهر",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-preview.json"
+}
