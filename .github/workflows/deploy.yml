@@ -27,7 +27,7 @@ jobs:
           enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist
+          path: ./.vercel/output/static
   deploy:
     needs: build
     runs-on: ubuntu-latest
