@@ -10,7 +10,8 @@ function CalendarPage() {
       <div className="mb-4">
         <h2 className="text-base font-semibold">تقویم ماهانه</h2>
         <p className="text-sm text-muted">
-          تکالیف روی روزها می‌نشینند؛ روز را بزنید تا برنامه همان تاریخ را ببینید.
+          روز را از نوار بالا یا خود تقویم انتخاب کنید، بعد تکلیف، جلسه مطالعه، امتحان یا رویداد همان
+          تاریخ را اضافه کنید.
         </p>
       </div>
       <MonthCalendar />

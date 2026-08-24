@@ -1,5 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
+import { CoursePicker } from "@/components/course-picker";
+import { JalaliDateField } from "@/components/jalali-date-field";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -42,7 +44,6 @@ export function TaskFormDialog({
   editing?: Task | null;
   prefill?: Partial<TaskDraft>;
 }) {
-  const courses = usePlannerStore((s) => s.courses);
   const addTask = usePlannerStore((s) => s.addTask);
   const updateTask = usePlannerStore((s) => s.updateTask);
   const [draft, setDraft] = useState<TaskDraft>(() => emptyDraft(prefill));
@@ -53,9 +54,14 @@ export function TaskFormDialog({
       const { id: _, ...rest } = editing;
       setDraft(rest);
     } else {
-      setDraft(emptyDraft({ courseId: courses[0]?.id, ...prefill }));
+      setDraft(
+        emptyDraft({
+          courseId: usePlannerStore.getState().courses[0]?.id ?? "",
+          ...prefill,
+        }),
+      );
     }
-  }, [open, editing, prefill, courses]);
+  }, [open, editing, prefill]);
 
   function patch<K extends keyof TaskDraft>(key: K, value: TaskDraft[K]) {
     setDraft((d) => ({ ...d, [key]: value }));
@@ -68,7 +74,7 @@ export function TaskFormDialog({
       return;
     }
     if (!draft.courseId) {
-      toast.error("درس را انتخاب کنید");
+      toast.error("درس را انتخاب کنید یا درس جدید بسازید");
       return;
     }
     if (editing) {
@@ -87,7 +93,7 @@ export function TaskFormDialog({
         <DialogHeader>
           <DialogTitle>{editing ? "ویرایش تکلیف" : "تکلیف جدید"}</DialogTitle>
           <DialogDescription>
-            مهلت، اولویت و نوع را مشخص کنید تا در تقویم و نمودارها دیده شود.
+            درس، مهلت و نوع را مشخص کنید. اگر درس در فهرست نیست، «درس دیگر» را بزنید.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="grid gap-3 sm:grid-cols-2">
@@ -99,18 +105,8 @@ export function TaskFormDialog({
               autoFocus
             />
           </Field>
-          <Field label="درس">
-            <NativeSelect
-              value={draft.courseId}
-              onChange={(e) => patch("courseId", e.target.value)}
-            >
-              <option value="">انتخاب درس</option>
-              {courses.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </NativeSelect>
+          <Field label="درس" className="sm:col-span-2">
+            <CoursePicker value={draft.courseId} onChange={(id) => patch("courseId", id)} />
           </Field>
           <Field label="نوع">
             <NativeSelect
@@ -148,19 +144,15 @@ export function TaskFormDialog({
               ))}
             </NativeSelect>
           </Field>
-          <Field label="مهلت انجام">
-            <Input
-              type="date"
-              value={draft.dueDate}
-              onChange={(e) => patch("dueDate", e.target.value)}
-            />
-          </Field>
           <Field label="ساعت ددلاین">
             <Input
               type="time"
               value={draft.dueTime}
               onChange={(e) => patch("dueTime", e.target.value)}
             />
+          </Field>
+          <Field label="مهلت انجام" className="sm:col-span-2">
+            <JalaliDateField value={draft.dueDate} onChange={(iso) => patch("dueDate", iso)} />
           </Field>
           <Field label={`اهمیت نسبی (${draft.importance}٪)`} className="sm:col-span-2">
             <input

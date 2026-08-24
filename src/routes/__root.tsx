@@ -3,7 +3,7 @@ import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import appCss from "../styles.css?url";
 
-const APP_NAME = "پلنر تحصیلی";
+const APP_NAME = "AVM PLANNER";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -11,7 +11,10 @@ export const Route = createRootRoute({
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: APP_NAME },
-      { name: "description", content: "پلنر تحصیلی برای مدیریت تکلیف، تقویم هفتگی و امتحانات" },
+      {
+        name: "description",
+        content: "AVM PLANNER — پلنر تحصیلی جلالی برای تکلیف، برنامه هفتگی و امتحانات",
+      },
       { name: "theme-color", content: "#2F6F7E" },
     ],
     links: [

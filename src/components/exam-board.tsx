@@ -1,26 +1,24 @@
-import { Plus, Trash2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { CoursePicker } from "@/components/course-picker";
+import { JalaliDateField } from "@/components/jalali-date-field";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Field, Input, NativeSelect, Textarea } from "@/components/ui/input";
-import { daysUntil, formatJalaliLong, formatTimeFa, remainingLabel, toFa } from "@/lib/jalali";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Field, Input, Textarea } from "@/components/ui/input";
+import { daysUntil, formatJalaliLong, formatTimeFa, remainingLabel, toFa, toISODate } from "@/lib/jalali";
 import { courseName } from "@/lib/stats";
 import { usePlannerStore } from "@/lib/store";
+import type { Exam } from "@/lib/types";
 import { COURSE_CHIP } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export function ExamBoard() {
   const exams = usePlannerStore((s) => s.exams);
   const courses = usePlannerStore((s) => s.courses);
-  const addExam = usePlannerStore((s) => s.addExam);
   const deleteExam = usePlannerStore((s) => s.deleteExam);
   const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<Exam | null>(null);
 
   const sorted = useMemo(
     () => exams.slice().sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time)),
@@ -36,24 +34,24 @@ export function ExamBoard() {
           <h2 className="text-base font-semibold">امتحانات و کوئیزها</h2>
           <p className="text-xs text-muted">شمارش معکوس تا برگه بعدی</p>
         </div>
-        <Button size="sm" onClick={() => setOpen(true)}>
+        <Button
+          size="sm"
+          onClick={() => {
+            setEditing(null);
+            setOpen(true);
+          }}
+        >
           <Plus />
           امتحان
         </Button>
       </div>
 
       <div className="grid gap-3 md:grid-cols-3">
-        {upcoming.slice(0, 3).map((exam, i) => {
+        {upcoming.slice(0, 3).map((exam) => {
           const d = daysUntil(exam.date);
           const course = courses.find((c) => c.id === exam.courseId);
           return (
-            <article
-              key={exam.id}
-              className={cn(
-                "overflow-hidden rounded-lg bg-paper shadow-sheet rise-in",
-                i === 0 && "md:col-span-1",
-              )}
-            >
+            <article key={exam.id} className="overflow-hidden rounded-lg bg-paper shadow-sheet rise-in">
               <div
                 className={cn(
                   "px-4 py-2 text-center text-xs font-semibold",
@@ -62,7 +60,14 @@ export function ExamBoard() {
               >
                 {d === 0 ? "امروز" : d === 1 ? "فردا" : `${toFa(d)} روز مانده`}
               </div>
-              <div className="space-y-2 p-4">
+              <button
+                type="button"
+                className="w-full space-y-2 p-4 text-right"
+                onClick={() => {
+                  setEditing(exam);
+                  setOpen(true);
+                }}
+              >
                 <h3 className="font-semibold leading-snug">{exam.title}</h3>
                 {course ? (
                   <span className={cn("inline-flex rounded-sm px-2 py-0.5 text-xs", COURSE_CHIP[course.color])}>
@@ -74,7 +79,7 @@ export function ExamBoard() {
                 </p>
                 <p className="text-sm">{exam.location}</p>
                 {exam.notes ? <p className="text-xs text-muted">{exam.notes}</p> : null}
-              </div>
+              </button>
             </article>
           );
         })}
@@ -106,21 +111,39 @@ export function ExamBoard() {
                   <td>{formatJalaliLong(exam.date)}</td>
                   <td>{formatTimeFa(exam.time)}</td>
                   <td>{exam.location}</td>
-                  <td data-tone className={daysUntil(exam.date) < 0 ? "bg-line" : daysUntil(exam.date) <= 3 ? "bg-late" : ""}>
+                  <td
+                    data-tone
+                    className={
+                      daysUntil(exam.date) < 0 ? "bg-line" : daysUntil(exam.date) <= 3 ? "bg-late" : ""
+                    }
+                  >
                     {remainingLabel(exam.date, false)}
                   </td>
                   <td>
-                    <button
-                      type="button"
-                      className="mx-auto flex size-8 items-center justify-center rounded-md text-muted hover:bg-late hover:text-ink"
-                      onClick={() => {
-                        deleteExam(exam.id);
-                        toast.success("امتحان حذف شد");
-                      }}
-                      aria-label="حذف"
-                    >
-                      <Trash2 className="size-3.5" />
-                    </button>
+                    <div className="flex justify-center gap-1">
+                      <button
+                        type="button"
+                        className="flex size-8 items-center justify-center rounded-md text-muted hover:bg-bg hover:text-ink"
+                        onClick={() => {
+                          setEditing(exam);
+                          setOpen(true);
+                        }}
+                        aria-label="ویرایش"
+                      >
+                        <Pencil className="size-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        className="flex size-8 items-center justify-center rounded-md text-muted hover:bg-late hover:text-ink"
+                        onClick={() => {
+                          deleteExam(exam.id);
+                          toast.success("امتحان حذف شد");
+                        }}
+                        aria-label="حذف"
+                      >
+                        <Trash2 className="size-3.5" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -132,45 +155,62 @@ export function ExamBoard() {
         ) : null}
       </div>
 
-      <ExamDialog open={open} onOpenChange={setOpen} onSave={(payload) => {
-        addExam(payload);
-        toast.success("امتحان ثبت شد");
-        setOpen(false);
-      }} />
+      <ExamFormDialog
+        open={open}
+        onOpenChange={(o) => {
+          setOpen(o);
+          if (!o) setEditing(null);
+        }}
+        editing={editing}
+      />
     </div>
   );
 }
 
-function ExamDialog({
+export function ExamFormDialog({
   open,
   onOpenChange,
-  onSave,
+  editing,
+  prefillDate,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (payload: {
-    title: string;
-    courseId: string;
-    date: string;
-    time: string;
-    location: string;
-    notes: string;
-    importance: number;
-  }) => void;
+  editing?: Exam | null;
+  prefillDate?: string;
 }) {
-  const courses = usePlannerStore((s) => s.courses);
+  const addExam = usePlannerStore((s) => s.addExam);
+  const updateExam = usePlannerStore((s) => s.updateExam);
   const [title, setTitle] = useState("");
-  const [courseId, setCourseId] = useState(courses[0]?.id ?? "");
-  const [date, setDate] = useState("");
+  const [courseId, setCourseId] = useState("");
+  const [date, setDate] = useState(toISODate(new Date()));
   const [time, setTime] = useState("09:00");
   const [location, setLocation] = useState("");
   const [notes, setNotes] = useState("");
+
+  useEffect(() => {
+    if (!open) return;
+    if (editing) {
+      setTitle(editing.title);
+      setCourseId(editing.courseId);
+      setDate(editing.date);
+      setTime(editing.time);
+      setLocation(editing.location);
+      setNotes(editing.notes);
+      return;
+    }
+    setTitle("");
+    setCourseId(usePlannerStore.getState().courses[0]?.id ?? "");
+    setDate(prefillDate || toISODate(new Date()));
+    setTime("09:00");
+    setLocation("");
+    setNotes("");
+  }, [open, editing, prefillDate]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>امتحان جدید</DialogTitle>
+          <DialogTitle>{editing ? "ویرایش امتحان" : "امتحان جدید"}</DialogTitle>
         </DialogHeader>
         <form
           className="grid gap-3 sm:grid-cols-2"
@@ -180,40 +220,43 @@ function ExamDialog({
               toast.error("عنوان و تاریخ لازم است");
               return;
             }
-            onSave({
+            if (!courseId) {
+              toast.error("درس را انتخاب کنید یا درس جدید بسازید");
+              return;
+            }
+            const payload = {
               title: title.trim(),
               courseId,
               date,
               time,
               location,
               notes,
-              importance: 80,
-            });
-            setTitle("");
-            setNotes("");
-            setLocation("");
+              importance: editing?.importance ?? 80,
+            };
+            if (editing) {
+              updateExam(editing.id, payload);
+              toast.success("امتحان به‌روز شد");
+            } else {
+              addExam(payload);
+              toast.success("امتحان ثبت شد");
+            }
+            onOpenChange(false);
           }}
         >
           <Field label="عنوان" className="sm:col-span-2">
-            <Input value={title} onChange={(e) => setTitle(e.target.value)} />
+            <Input value={title} onChange={(e) => setTitle(e.target.value)} autoFocus />
           </Field>
-          <Field label="درس">
-            <NativeSelect value={courseId} onChange={(e) => setCourseId(e.target.value)}>
-              {courses.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </NativeSelect>
+          <Field label="درس" className="sm:col-span-2">
+            <CoursePicker value={courseId} onChange={setCourseId} />
           </Field>
           <Field label="محل">
             <Input value={location} onChange={(e) => setLocation(e.target.value)} />
           </Field>
-          <Field label="تاریخ">
-            <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-          </Field>
           <Field label="ساعت">
             <Input type="time" value={time} onChange={(e) => setTime(e.target.value)} />
+          </Field>
+          <Field label="تاریخ" className="sm:col-span-2">
+            <JalaliDateField value={date} onChange={setDate} />
           </Field>
           <Field label="یادداشت" className="sm:col-span-2">
             <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} />
@@ -222,7 +265,7 @@ function ExamDialog({
             <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
               انصراف
             </Button>
-            <Button type="submit">ثبت امتحان</Button>
+            <Button type="submit">{editing ? "ذخیره" : "ثبت امتحان"}</Button>
           </div>
         </form>
       </DialogContent>

@@ -1,8 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="7" fill="#F3EEE4"/>
-  <rect width="32" height="6" fill="#2F6F7E"/>
-  <rect x="6" y="11" width="20" height="15" rx="2" fill="#FFFCF7" stroke="#2F6F7E" stroke-width="1.5"/>
-  <path d="M6 18h20M16 11v15" stroke="#2F6F7E" stroke-width="1.25"/>
-  <rect x="8.5" y="13.2" width="5" height="3.2" rx="0.6" fill="#F0D6D4"/>
-  <rect x="18.5" y="20.2" width="5" height="3.2" rx="0.6" fill="#D0E8DA"/>
+  <rect width="32" height="32" rx="7" fill="#2F6F7E"/>
+  <rect x="3" y="3" width="26" height="26" rx="5" fill="#FFFCF7"/>
+  <rect x="3" y="3" width="26" height="8" rx="5" fill="#2F6F7E"/>
+  <rect x="3" y="7" width="26" height="4" fill="#2F6F7E"/>
+  <text x="16" y="9.2" text-anchor="middle" font-size="6.2" font-family="Tahoma, Arial, sans-serif" font-weight="700" fill="#F7F3EB">AVM</text>
+  <rect x="7" y="14" width="5" height="4" rx="1" fill="#F0D6D4"/>
+  <rect x="13.5" y="14" width="5" height="4" rx="1" fill="#D0E8DA"/>
+  <rect x="20" y="14" width="5" height="4" rx="1" fill="#D0E4F0"/>
+  <rect x="7" y="20" width="5" height="4" rx="1" fill="#F0E4CC"/>
+  <rect x="13.5" y="20" width="5" height="4" rx="1" fill="#DDD9F0"/>
+  <rect x="20" y="20" width="5" height="4" rx="1" fill="#2F6F7E"/>
 </svg>

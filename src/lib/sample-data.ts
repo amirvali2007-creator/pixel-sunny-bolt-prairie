@@ -1,12 +1,31 @@
 import type { Course, Exam, ImportantDate, PlannerData, StudyBlock, Task } from "./types";
-import { addDays, jalaliToISO, startOfWeek, toISODate, toJalali } from "./jalali";
-
-function isoOffset(days: number): string {
-  return toISODate(addDays(new Date(), days));
-}
+import { DEFAULT_DAY_END, DEFAULT_DAY_START } from "./types";
+import { isoOffset, jalaliToISO, startOfWeek, toISODate, toJalali } from "./jalali";
 
 function weekIso(offsetFromStart: number, weekStart: PlannerData["weekStart"] = "sat"): string {
-  return toISODate(addDays(startOfWeek(new Date(), weekStart), offsetFromStart));
+  return toISODate(addWeek(offsetFromStart, weekStart));
+}
+
+function addWeek(offsetFromStart: number, weekStart: PlannerData["weekStart"]) {
+  const start = startOfWeek(new Date(), weekStart);
+  const next = new Date(start);
+  next.setDate(next.getDate() + offsetFromStart);
+  return next;
+}
+
+export function createEmptyData(): PlannerData {
+  return {
+    studentName: "دانشجو",
+    academicYear: "۱۴۰۵–۱۴۰۶",
+    weekStart: "sat",
+    dayStart: DEFAULT_DAY_START,
+    dayEnd: DEFAULT_DAY_END,
+    courses: [],
+    tasks: [],
+    blocks: [],
+    exams: [],
+    importantDates: [],
+  };
 }
 
 export function createSampleData(): PlannerData {
@@ -305,14 +324,14 @@ export function createSampleData(): PlannerData {
   ];
 
   const blocks: StudyBlock[] = [
-    { id: "b1", date: weekIso(0), start: "09:00", end: "11:00", title: "حل تمرین ریاضی", courseId: "c1", notes: "" },
+    { id: "b1", date: weekIso(0), start: "10:00", end: "12:00", title: "حل تمرین ریاضی", courseId: "c1", notes: "" },
     { id: "b2", date: weekIso(0), start: "14:00", end: "16:00", title: "کدنویسی پروژه", courseId: "c3", notes: "" },
     { id: "b3", date: weekIso(1), start: "10:00", end: "12:00", title: "مرور فیزیک", courseId: "c2", notes: "" },
-    { id: "b4", date: weekIso(2), start: "08:00", end: "10:00", title: "مدار منطقی", courseId: "c4", notes: "" },
+    { id: "b4", date: weekIso(2), start: "10:00", end: "12:00", title: "مدار منطقی", courseId: "c4", notes: "" },
     { id: "b5", date: weekIso(2), start: "16:00", end: "18:00", title: "آمار — رگرسیون", courseId: "c5", notes: "" },
-    { id: "b6", date: weekIso(3), start: "09:00", end: "12:00", title: "اسپرینت پروژه", courseId: "c3", notes: "" },
+    { id: "b6", date: weekIso(3), start: "10:00", end: "13:00", title: "اسپرینت پروژه", courseId: "c3", notes: "" },
     { id: "b7", date: weekIso(4), start: "10:00", end: "11:30", title: "زبان تخصصی", courseId: "c6", notes: "" },
-    { id: "b8", date: weekIso(5), start: "08:00", end: "10:00", title: "ریاضی — انتگرال", courseId: "c1", notes: "" },
+    { id: "b8", date: weekIso(5), start: "10:00", end: "12:00", title: "ریاضی — انتگرال", courseId: "c1", notes: "" },
     { id: "b9", date: weekIso(5), start: "15:00", end: "17:00", title: "آزمایشگاه فیزیک", courseId: "c8", notes: "" },
   ];
 
@@ -383,6 +402,8 @@ export function createSampleData(): PlannerData {
     studentName: "دانشجو",
     academicYear: "۱۴۰۵–۱۴۰۶",
     weekStart: "sat",
+    dayStart: DEFAULT_DAY_START,
+    dayEnd: DEFAULT_DAY_END,
     courses,
     tasks,
     blocks,

@@ -16,7 +16,7 @@ import { TaskFormDialog, type TaskDraft } from "@/components/task-form";
 import { Button } from "@/components/ui/button";
 import { copyForSheets, downloadExcel } from "@/lib/export-excel";
 import { formatJalaliShort } from "@/lib/jalali";
-import { usePlannerStore } from "@/lib/store";
+import { migrateLegacyStorage, usePlannerStore } from "@/lib/store";
 import type { Task } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -51,7 +51,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   const academicYear = usePlannerStore((s) => s.academicYear);
 
   useEffect(() => {
-    void usePlannerStore.persist.rehydrate();
+    migrateLegacyStorage();
+    void Promise.resolve(usePlannerStore.persist.rehydrate()).then(() => {
+      usePlannerStore.getState().markHydrated();
+    });
   }, []);
 
   const api = useMemo<DialogApi>(
@@ -93,21 +96,16 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div className="h-1.5 bg-accent" />
             <header className="border-b border-line px-4 py-3 md:px-6">
               <div className="flex items-center gap-3">
-                <div className="flex size-10 items-center justify-center rounded-md bg-accent-soft">
-                  <span className="grid grid-cols-2 gap-0.5">
-                    <span className="size-2 rounded-[2px] bg-accent" />
-                    <span className="size-2 rounded-[2px] bg-blush" />
-                    <span className="size-2 rounded-[2px] bg-sand" />
-                    <span className="size-2 rounded-[2px] bg-mint" />
-                  </span>
+                <div className="flex size-10 items-center justify-center rounded-md bg-accent text-xs font-bold tracking-wide text-accent-fg">
+                  AVM
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-baseline gap-x-2">
-                    <h1 className="text-lg font-semibold leading-tight md:text-xl">پلنر تحصیلی</h1>
+                    <h1 className="text-lg font-semibold leading-tight md:text-xl">AVM PLANNER</h1>
                     <span className="text-xs text-muted">{academicYear}</span>
                   </div>
                   <p className="truncate text-xs text-muted">
-                    {studentName} · {formatJalaliShort(new Date())}
+                    {studentName} · {formatJalaliShort(new Date())} · پلنر تحصیلی
                   </p>
                 </div>
                 <div className="hidden items-center gap-2 sm:flex">
@@ -151,9 +149,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               </div>
               <nav className="mt-3 hidden gap-1 md:flex" aria-label="بخش‌ها">
                 {NAV.map((item) => {
-                  const active = Boolean(
-                    matchRoute({ to: item.to, fuzzy: item.to !== "/" }),
-                  );
+                  const active = Boolean(matchRoute({ to: item.to, fuzzy: item.to !== "/" }));
                   return (
                     <Link
                       key={item.to}
@@ -184,9 +180,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         >
           <ul className="grid grid-cols-5">
             {NAV.map((item) => {
-              const active = Boolean(
-                matchRoute({ to: item.to, fuzzy: item.to !== "/" }),
-              );
+              const active = Boolean(matchRoute({ to: item.to, fuzzy: item.to !== "/" }));
               return (
                 <li key={item.to}>
                   <Link

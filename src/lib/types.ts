@@ -81,6 +81,8 @@ export interface PlannerData {
   studentName: string;
   academicYear: string;
   weekStart: WeekStart;
+  dayStart: string;
+  dayEnd: string;
   courses: Course[];
   tasks: Task[];
   blocks: StudyBlock[];
@@ -156,3 +158,15 @@ export const COURSE_DOT: Record<CourseColor, string> = {
 export const TASK_TYPES = Object.keys(TASK_TYPE_LABELS) as TaskType[];
 export const PRIORITIES = Object.keys(PRIORITY_LABELS) as Priority[];
 export const STATUSES = Object.keys(STATUS_LABELS) as TaskStatus[];
+export const COURSE_COLORS = Object.keys(COURSE_COLOR_LABELS) as CourseColor[];
+
+export const HOUR_PRESETS = [
+  { label: "۱۰ تا ۲۲", start: "10:00", end: "22:00" },
+  { label: "۸ تا ۱۶", start: "08:00", end: "16:00" },
+  { label: "۸ تا ۲۰", start: "08:00", end: "20:00" },
+  { label: "۷ تا ۲۳", start: "07:00", end: "23:00" },
+  { label: "۹ تا ۲۱", start: "09:00", end: "21:00" },
+] as const;
+
+export const DEFAULT_DAY_START = "10:00";
+export const DEFAULT_DAY_END = "22:00";

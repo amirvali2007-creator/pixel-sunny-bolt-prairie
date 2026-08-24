@@ -2,6 +2,8 @@ import * as XLSX from "xlsx";
 import type { PlannerData } from "./types";
 import {
   DATE_KIND_LABELS,
+  DEFAULT_DAY_END,
+  DEFAULT_DAY_START,
   PRIORITY_LABELS,
   STATUS_LABELS,
   TASK_TYPE_LABELS,
@@ -34,6 +36,7 @@ export function downloadExcel(data: PlannerData) {
   const summary = [
     { شاخص: "نام دانشجو", مقدار: data.studentName },
     { شاخص: "سال تحصیلی", مقدار: data.academicYear },
+    { شاخص: "بازه روزانه", مقدار: `${data.dayStart ?? DEFAULT_DAY_START}–${data.dayEnd ?? DEFAULT_DAY_END}` },
     { شاخص: "تعداد تکالیف", مقدار: data.tasks.length },
     { شاخص: "تکمیل‌شده", مقدار: data.tasks.filter((t) => t.status === "done").length },
     { شاخص: "تعداد دروس", مقدار: data.courses.length },
@@ -75,7 +78,7 @@ export function downloadExcel(data: PlannerData) {
   }));
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dates), "تاریخ‌های مهم");
 
-  XLSX.writeFile(wb, "planer-tahsili.xlsx");
+  XLSX.writeFile(wb, "avm-planner.xlsx");
 }
 
 export async function copyForSheets(data: PlannerData) {
@@ -86,4 +89,37 @@ export async function copyForSheets(data: PlannerData) {
     ...rows.map((r) => keys.map((k) => String((r as Record<string, unknown>)[k] ?? "")).join("\t")),
   ];
   await navigator.clipboard.writeText(lines.join("\n"));
+}
+
+export function downloadBackup(data: PlannerData) {
+  const payload = {
+    studentName: data.studentName,
+    academicYear: data.academicYear,
+    weekStart: data.weekStart,
+    dayStart: data.dayStart,
+    dayEnd: data.dayEnd,
+    courses: data.courses,
+    tasks: data.tasks,
+    blocks: data.blocks,
+    exams: data.exams,
+    importantDates: data.importantDates,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "avm-planner-backup.json";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+export function parseBackup(text: string): Partial<PlannerData> | null {
+  try {
+    const data = JSON.parse(text) as Partial<PlannerData>;
+    if (!data || typeof data !== "object") return null;
+    if (!Array.isArray(data.tasks) && !Array.isArray(data.courses)) return null;
+    return data;
+  } catch {
+    return null;
+  }
 }

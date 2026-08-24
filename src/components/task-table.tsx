@@ -1,4 +1,4 @@
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Copy, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,7 @@ const HEADERS = [
   { key: "نمره", cls: "bg-peach" },
   { key: "اهمیت", cls: "bg-lilac" },
   { key: "یادداشت", cls: "bg-mint" },
-  { key: "", cls: "bg-sky w-16" },
+  { key: "", cls: "bg-sky w-24" },
 ] as const;
 
 function priorityTone(p: Priority) {
@@ -73,6 +73,7 @@ export function TaskTable({
   const updateTask = usePlannerStore((s) => s.updateTask);
   const deleteTask = usePlannerStore((s) => s.deleteTask);
   const toggleTaskDone = usePlannerStore((s) => s.toggleTaskDone);
+  const duplicateTask = usePlannerStore((s) => s.duplicateTask);
   const [selected, setSelected] = useState<Record<string, boolean>>({});
 
   const selectedIds = tasks.filter((t) => selected[t.id]).map((t) => t.id);
@@ -123,7 +124,7 @@ export function TaskTable({
         </div>
       </div>
 
-      <div className="md:hidden divide-y divide-line">
+      <div className="divide-y divide-line md:hidden">
         {tasks.length === 0 ? (
           <EmptyRow onAdd={onAdd} />
         ) : (
@@ -149,7 +150,7 @@ export function TaskTable({
                     <span className="truncate text-sm font-medium">{task.title}</span>
                   </div>
                   <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-muted">
-                    <span>{course?.name}</span>
+                    <span>{course?.name ?? "بدون درس"}</span>
                     <span>·</span>
                     <span>{TASK_TYPE_LABELS[task.type]}</span>
                     <span>·</span>
@@ -198,7 +199,6 @@ export function TaskTable({
               </tr>
             ) : (
               tasks.map((task, i) => {
-                const course = courses.find((c) => c.id === task.courseId);
                 const overdue = isOverdue(task);
                 return (
                   <tr key={task.id}>
@@ -284,7 +284,7 @@ export function TaskTable({
                         ))}
                       </NativeSelect>
                       {overdue ? (
-                        <div className="text-[0.65rem] font-medium">عقب‌افتاده</div>
+                        <div className="text-xs font-medium">عقب‌افتاده</div>
                       ) : null}
                     </td>
                     <td>
@@ -302,9 +302,7 @@ export function TaskTable({
                           style={{ width: `${task.importance}%` }}
                         />
                       </div>
-                      <div className="mt-0.5 text-[0.65rem] text-muted">
-                        {toFa(task.importance)}٪
-                      </div>
+                      <div className="mt-0.5 text-xs text-muted">{toFa(task.importance)}٪</div>
                     </td>
                     <td className="max-w-40 text-right text-muted">
                       <span className="line-clamp-2">{task.notes || "—"}</span>
@@ -318,6 +316,17 @@ export function TaskTable({
                           aria-label="ویرایش"
                         >
                           <Pencil className="size-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          className="flex size-8 items-center justify-center rounded-md text-muted hover:bg-bg hover:text-ink"
+                          onClick={() => {
+                            duplicateTask(task.id);
+                            toast.success("کپی تکلیف ساخته شد");
+                          }}
+                          aria-label="کپی"
+                        >
+                          <Copy className="size-3.5" />
                         </button>
                         <button
                           type="button"
@@ -358,7 +367,7 @@ export function TaskChip({ task }: { task: Task }) {
   return (
     <span
       className={cn(
-        "inline-flex max-w-full items-center gap-1 truncate rounded-sm px-1.5 py-0.5 text-[0.65rem]",
+        "inline-flex max-w-full items-center gap-1 truncate rounded-sm px-1.5 py-0.5 text-xs",
         course ? COURSE_CHIP[course.color] : "bg-bg",
       )}
     >
